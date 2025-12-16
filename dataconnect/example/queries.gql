@@ -1,0 +1,42 @@
+mutation CreateNewRecipe($title: String!, $cuisine: String!, $instructions: String!, $mealType: String!, $isPublic: Boolean!, $description: String, $imageUrl: String, $cookTime: Int, $prepTime: Int, $servings: Int) @auth(level: USER) {
+  recipe_insert(data: {
+    title: $title,
+    cuisine: $cuisine,
+    instructions: $instructions,
+    mealType: $mealType,
+    isPublic: $isPublic,
+    description: $description,
+    imageUrl: $imageUrl,
+    cookTime: $cookTime,
+    prepTime: $prepTime,
+    servings: $servings,
+    authorId_expr: "auth.uid"
+  })
+}
+
+query GetPublicRecipes @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  recipes(where: {isPublic: {eq: true}}) {
+    id
+    title
+    cuisine
+    imageUrl
+  }
+}
+
+mutation AddCommentToRecipe($recipeId: UUID!, $text: String!) @auth(level: USER) {
+  comment_insert(data: {
+    recipeId: $recipeId,
+    text: $text,
+    userId_expr: "auth.uid",
+    createdAt_expr: "request.time"
+  })
+}
+
+query GetMyRecipes @auth(level: USER) {
+  recipes(where: {authorId: {eq_expr: "auth.uid"}}) {
+    id
+    title
+    cuisine
+    imageUrl
+  }
+}
